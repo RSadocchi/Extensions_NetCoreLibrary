@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
@@ -11,6 +12,40 @@ namespace Extensions
 {
     public static class Extensions
     {
+        public static byte[] ToByteArray(this Stream stream)
+        {
+            byte[] output = new byte[16*1024];
+            using (var ms = new MemoryStream())
+            {
+                int read;
+                while ((read = stream.Read(output,0,output.Length)) > 0)
+                    ms.Write(output, 0, read);
+                return ms.ToArray();
+            }
+        }
+
+        public static byte[] ToByteArray(this string source, Encoding encoding = null)
+        {
+            if (encoding == null)
+                encoding = Encoding.UTF8;
+            return encoding.GetBytes(source);
+        }
+
+        public static string ToStringBack(this byte[] source)
+        {
+            string text = null;
+            using (var ms = new MemoryStream(source))
+                using (var sr = new StreamReader(ms))
+                    text = sr.ReadToEnd();
+            return text;
+        }
+
+        public static Stream ToStream(this string source, Encoding encoding = null)
+        {
+            byte[] byteArray = source.ToByteArray(encoding);
+            return new MemoryStream(byteArray);
+        }
+
         public static string GetMD5Hash(this string source)
         {
             if (string.IsNullOrWhiteSpace(source))

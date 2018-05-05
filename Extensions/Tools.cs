@@ -7,6 +7,7 @@ namespace Extensions
 {
     public static class Tools
     {
+
         public static string RandomCodeGenerator(int Length = 5, bool LowerCase = true, bool UpperCase = true, bool Numbers = true, bool SpecialChars = false)
         {
             string lowers = "abcdefghijklmnopqrstuvwxyz";

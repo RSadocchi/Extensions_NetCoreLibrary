@@ -36,11 +36,10 @@ namespace Extensions.Compression
                 zipfilename = _CheckExtension(zipfilename);
 
                 if (string.IsNullOrEmpty(contentfilename) || string.IsNullOrWhiteSpace(contentfilename))
-                    zipfilename = $"{DateTime.Now.ToString("yyyyMMdd_hhmmssffff")}_content.txt";
+                    contentfilename = $"{DateTime.Now.ToString("yyyyMMdd_hhmmssffff")}_content.txt";
 
                 if (string.IsNullOrEmpty(outputpath) || string.IsNullOrWhiteSpace(outputpath))
                     outputpath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-
                 if (!Directory.Exists(outputpath))
                     Directory.CreateDirectory(outputpath);
 
@@ -73,12 +72,23 @@ namespace Extensions.Compression
             {
                 var resCollection = new List<ZipResult>();
 
+                if (string.IsNullOrEmpty(zipfilename) || string.IsNullOrWhiteSpace(zipfilename))
+                    zipfilename = $"{DateTime.Now.ToString("yyyyMMdd_hhmmssffff")}.zip";
+                zipfilename = _CheckExtension(zipfilename);
+
+                if (string.IsNullOrEmpty(outputpath) || string.IsNullOrWhiteSpace(outputpath))
+                    outputpath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                if (!Directory.Exists(outputpath))
+                    Directory.CreateDirectory(outputpath);
+
+                using (var stream = File.Create(Path.Combine(outputpath, zipfilename))) { }
+
                 foreach (var kvp in nameContentCollection)
                 {
                     if (string.IsNullOrEmpty(kvp.Value) || string.IsNullOrWhiteSpace(kvp.Value))
                         continue;
 
-                    //resCollection.Add(await CreateFromStringAsync(kvp.Value, zipfilename, kvp.Key, outputpath));
+                    resCollection.Add(await AddOnExistingFromStringAsync(kvp.Value,Path.Combine(outputpath,zipfilename),kvp.Key));
                 }
 
                 return resCollection;
@@ -172,7 +182,48 @@ namespace Extensions.Compression
 
 
         #region UPDATE METHODS
+        public async Task<ZipResult> AddOnExistingFromStringAsync(string content, string existingzip, string newfilename = null)
+        {
+            exception = null;
+            try
+            {
+                if (string.IsNullOrEmpty(content) || string.IsNullOrWhiteSpace(content))
+                    throw new ArgumentException("Text cannot be null or empty", nameof(content));
 
+                if (string.IsNullOrEmpty(existingzip) || string.IsNullOrWhiteSpace(existingzip))
+                    throw new ArgumentException("Text cannot be null or empty", nameof(existingzip));
+                else if (!File.Exists(existingzip))
+                    throw new FileNotFoundException($"'{existingzip}' not found!.");
+
+                if (string.IsNullOrEmpty(newfilename) || string.IsNullOrWhiteSpace(newfilename))
+                    newfilename = $"{DateTime.Now.ToString("yyyyMMdd_hhmmssffff")}_content.txt";
+
+                using (var stream = new FileStream(existingzip, FileMode.Open))
+                using (var archive = new ZipArchive(stream, ZipArchiveMode.Update))
+                {
+                    var entry = archive.CreateEntry(newfilename);
+                    using (var sw = new StreamWriter(entry.Open()))
+                        await sw.WriteAsync(content);
+                }
+
+                return new ZipResult(existingzip);
+            }
+            catch (ArgumentException e)
+            {
+                exception = new Exception(e.Message, e);
+                return null;
+            }
+            catch (FileNotFoundException e)
+            {
+                exception = new Exception(e.Message, e);
+                return null;
+            }
+            catch (Exception e)
+            {
+                exception = e;
+                return null;
+            }
+        }
         #endregion
 
 

@@ -7,6 +7,7 @@ namespace Extensions.Linq
 {
     public static class Extensions
     {
+        #region OBSERVABLE COLLECTION
         public static ObservableCollection<T> ToObservable<T>(this IEnumerable<T> source)
         {
             if (source == null || source.Count() <= 0) return null;
@@ -36,7 +37,9 @@ namespace Extensions.Linq
             if (source == null || source.Count() <= 0) return null;
             return new ObservableCollection<T>(source);
         }
+        #endregion
 
+        #region ORDER BY
         public static IOrderedEnumerable<TSource> OrderBy<TSource, TKey1, TKey2>(this IEnumerable<TSource> source, Func<TSource, TKey1> key1, Func<TSource, TKey2> key2)
         {
             if (source == null || source.Count() <= 0) return null;
@@ -48,7 +51,9 @@ namespace Extensions.Linq
             if (source == null || source.Count() <= 0) return null;
             return source.OrderByDescending(key1).ThenByDescending(key2);
         }
+        #endregion
 
+        #region DISTINCT BY
         public static IEnumerable<TSource> DistinctBy<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> func)
         {
             if (source == null || source.Count() <= 0) return null;
@@ -60,5 +65,8 @@ namespace Extensions.Linq
             if (source == null || source.Count() <= 0) return null;
             return source.GroupBy(func).Select(o => o.First());
         }
+        #endregion
+
+
     }
 }

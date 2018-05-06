@@ -20,7 +20,7 @@ namespace Extensions.Compression
         public Exception GetException { get { return exception; } }
         #endregion
 
-        #region PUBLIC METHODS
+        #region CREATE METHODS
         #region from strings
         public async Task<ZipResult> CreateFromStringAsync(string content, string zipfilename, string contentfilename, string outputpath = null)
         {
@@ -65,7 +65,7 @@ namespace Extensions.Compression
             }
         }
 
-        public async Task<List<ZipResult>> CreateFromStringsAsync(IEnumerable<string> contents, string zipfilename, IEnumerable<string> contentfilesname = null, string outputpath = null)
+        public async Task<List<ZipResult>> CreateFromStringsAsync(IEnumerable<KeyValuePair<string,string>> nameContentCollection,string zipfilename, string outputpath = null)
         {
             exception = null;
 
@@ -73,13 +73,15 @@ namespace Extensions.Compression
             {
                 var resCollection = new List<ZipResult>();
 
-                foreach (var content in contents)
+                foreach (var kvp in nameContentCollection)
                 {
-                    if (string.IsNullOrEmpty(content) || string.IsNullOrWhiteSpace(content))
+                    if (string.IsNullOrEmpty(kvp.Value) || string.IsNullOrWhiteSpace(kvp.Value))
                         continue;
+
+                    //resCollection.Add(await CreateFromStringAsync(kvp.Value, zipfilename, kvp.Key, outputpath));
                 }
 
-                return null;
+                return resCollection;
             }
             catch (ArgumentException e)
             {
@@ -139,9 +141,39 @@ namespace Extensions.Compression
                 return null;
             }
         }
+
+        public async Task<List<ZipResult>> CreateFromFilesAsync(IEnumerable<string> filepaths, string zipfilename = null, string outputpath = null)
+        {
+            exception = null;
+
+            try
+            {
+
+            }
+            catch (ArgumentException e)
+            {
+                exception = new Exception(e.Message, e);
+                return null;
+            }
+            catch (FileNotFoundException e)
+            {
+                exception = new Exception(e.Message, e);
+                return null;
+            }
+            catch (Exception e)
+            {
+                exception = e;
+                return null;
+            }
+            return null;
+        }
         #endregion
         #endregion
 
+
+        #region UPDATE METHODS
+
+        #endregion
 
 
         #region EVENTS

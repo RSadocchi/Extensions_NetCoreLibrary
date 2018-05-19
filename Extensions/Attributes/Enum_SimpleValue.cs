@@ -3,13 +3,12 @@
 namespace Extensions.Attributes
 {
     [AttributeUsage(AttributeTargets.Enum | AttributeTargets.Field, AllowMultiple = false, Inherited = false)]
-    public class StringValue : Attribute
+    public class SimpleValue : Attribute
     {
-        public string Value { get; private set; }
-        public StringValue(string value)
+        public object Value { get; private set; }
+        public SimpleValue(object value)
         {
             Value = value;
         }
     }
-
 }
